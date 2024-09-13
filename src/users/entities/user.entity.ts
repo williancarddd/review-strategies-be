@@ -1,7 +1,7 @@
 import { z } from 'nestjs-zod/z';
 
 export const UserSchema = z.object({
-  id: z.string().cuid().optional().describe('The id of the user'),
+  id: z.string().cuid().describe('The id of the user'),
   username: z.string({
     required_error: 'Username is required',
   }).min(3).describe('The username of the user'),
@@ -17,6 +17,6 @@ export const UserSchema = z.object({
   email: z.string({
     required_error: 'Email is required',
   }).email().describe('The email of the user'),
-  created_at: z.date().optional().describe('The date when the user was created'),
-  updated_at: z.date().optional().describe('The date when the user was updated'),
+  createdAt: z.date().describe('The date when the user was created'),
+  updatedAt: z.date().describe('The date when the user was updated'),
 });

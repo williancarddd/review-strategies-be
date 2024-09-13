@@ -2,9 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto, CreateUserSchema } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/database/prisma/prisma.service';
-import { Prisma } from '@prisma/client';
-import { createPaginator } from 'prisma-pagination';
-import { GetUserDto, GetUserSchema } from './dto/get-user.dto';
+import {  GetUserSchema } from './dto/get-user.dto';
 import { encryptPassword } from 'src/utils/crypto';
 
 @Injectable()
@@ -30,7 +28,7 @@ export class UsersService {
   }
 
   async findOne(id: string) {
-    const user = await this.prisma.user.findUnique({ where: { id }, include: { person: true, company: true } });
+    const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -38,7 +36,7 @@ export class UsersService {
   }
 
   async findByEmail(email: string) {
-    const user = await this.prisma.user.findUnique({ where: { email }, include: { person: true, company: true } });
+    const user = await this.prisma.user.findUnique({ where: { email }});
     return user;
   }
 
@@ -51,10 +49,6 @@ export class UsersService {
       data: {
         ...parseUser,
         password: ifUpdatedPassword.password,
-      },
-      include: {
-        person: true,
-        company: true
       }
     });
     return user;

@@ -11,8 +11,7 @@ async function bootstrap() {
   app.useGlobalFilters(new PrismaExceptionFilters());
   patchNestJsSwagger();
   const config = new DocumentBuilder()
-    .setTitle('PHALA API')
-    .setDescription('aPI for PHALA')
+    .setTitle('REVIEW STRATEGIES')
     .setVersion('1.0')
     .addBearerAuth(
       {
