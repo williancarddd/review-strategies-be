@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto, CreateUserSchema } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/database/prisma/prisma.service';
-import {  GetUserSchema } from './dto/get-user.dto';
+import { GetUserSchema } from './dto/get-user.dto';
 import { encryptPassword } from 'src/utils/crypto';
 
 @Injectable()
@@ -13,7 +13,7 @@ export class UsersService {
 
   async create(createUserDto: CreateUserDto) {
     const user = CreateUserSchema.parse(createUserDto);
-    const transUser = this.prisma.$transaction(async () => {
+    const transUser = await this.prisma.$transaction(async () => {
       const newUser = await this.prisma.user.create({
         data: {
           ...user,
@@ -22,8 +22,7 @@ export class UsersService {
       });
 
       return newUser;
-    }
-    );
+    });
     return transUser;
   }
 
@@ -36,14 +35,21 @@ export class UsersService {
   }
 
   async findByEmail(email: string) {
-    const user = await this.prisma.user.findUnique({ where: { email }});
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
     return user;
   }
+  
 
   async update(id: string, updateUserDto: UpdateUserDto) {
 
     const parseUser = GetUserSchema.parse(updateUserDto);
-    const ifUpdatedPassword = parseUser.password ? { password: encryptPassword(parseUser.password) } : {};
+    const ifUpdatedPassword = parseUser.password
+      ? { password: encryptPassword(parseUser.password) }
+      : {};
+
     const user = await this.prisma.user.update({
       where: { id },
       data: {
