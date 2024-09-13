@@ -1,12 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { CreateUserDto, CreateUserSchema } from './dto/create-user.dto';
 import { UpdateUserDto, UpdateUserSchema } from './dto/update-user.dto';
 import { ZodPipe } from 'src/commons/pipe/zod.pipe';
-import { ApiPaginatedResponse } from 'src/commons/decorators/api-pagination-response.decorator';
-import { GetUserDto } from './dto/get-user.dto';
-import { Public } from 'src/commons/decorators/public.decorators';
 import { UsersService } from './users.service';
+import { Public } from 'src/commons/decorators/public.decorators';
 
 
 @ApiTags('users')

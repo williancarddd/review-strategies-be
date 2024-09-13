@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import { PrismaModule } from './database/prisma/prisma.module';
@@ -8,6 +8,9 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { StudyThemesModule } from './study-themes/study-themes.module';
 import { StudyDatesModule } from './study-dates/study-dates.module';
+import { PaymentsModule } from './payments/payments.module';
+import { VerifyPaymentMiddleware } from './commons/middlewares/check.payment';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -18,12 +21,23 @@ import { StudyDatesModule } from './study-dates/study-dates.module';
     PrismaModule,
     StudyThemesModule,
     StudyDatesModule,
+    PaymentsModule,
   ],
   providers: [
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
+    JwtService,
   ],
 })
-export class AppModule { }
+export class AppModule {
+  // use middleware VerifyPaymentMiddleware()
+
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(VerifyPaymentMiddleware)
+      .forRoutes('/*');
+  }
+
+}

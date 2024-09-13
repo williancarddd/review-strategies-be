@@ -9,6 +9,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalFilters(new ZodFilter());
   app.useGlobalFilters(new PrismaExceptionFilters());
+  
   patchNestJsSwagger();
   const config = new DocumentBuilder()
     .setTitle('REVIEW STRATEGIES')
