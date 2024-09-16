@@ -11,6 +11,7 @@ import { StudyDatesModule } from './study-dates/study-dates.module';
 import { PaymentsModule } from './payments/payments.module';
 import { VerifyPaymentMiddleware } from './commons/middlewares/check.payment';
 import { JwtService } from '@nestjs/jwt';
+import { TicketsModule } from './tickets/tickets.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { JwtService } from '@nestjs/jwt';
     StudyThemesModule,
     StudyDatesModule,
     PaymentsModule,
+    TicketsModule,
   ],
   providers: [
     {
@@ -32,12 +34,5 @@ import { JwtService } from '@nestjs/jwt';
   ],
 })
 export class AppModule {
-  // use middleware VerifyPaymentMiddleware()
-
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(VerifyPaymentMiddleware)
-      .forRoutes('/*');
-  }
 
 }

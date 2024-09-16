@@ -1,0 +1,32 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+  push:
+    branches: [ "dev" ]
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:   
+    - name: Checkout code
+      uses: actions/checkout@v3
+        
+    - name: Set Dotenv
+      run: cp /home/ecotech/.env-review-strategies  ./.env
+      
+    - name: Cache Docker layers
+      uses: actions/cache@v3
+      with:
+        path: /home/runner/.docker
+        key: ${{ runner.os }}-docker-${{ hashFiles('**/Dockerfile') }}
+        restore-keys: |
+          ${{ runner.os }}-docker-
+
+    - name: Docker down
+      run: docker-compose down
+
+    - name: Build and start Docker containers
+      run: docker-compose up --build -d
+

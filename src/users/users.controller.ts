@@ -33,6 +33,14 @@ export class UsersController {
     return this.usersService.update(id, updateUserDto);
   }
 
+  @ApiOperation({ summary: 'Get user by ID' })
+  @ApiResponse({ status: 200, description: 'User found.' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.usersService.findOne(id);
+  }
+
   @ApiOperation({ summary: 'Delete a user by ID' })
   @ApiResponse({ status: 200, description: 'The user has been successfully deleted.' })
   @ApiResponse({ status: 404, description: 'User not found' })

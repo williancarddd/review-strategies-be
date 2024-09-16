@@ -20,8 +20,8 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) { }
 
-  async validateUser(email: string, password: string): Promise<any> {
-    const user = await this.usersService.findByEmail(email);
+  async validateUser(login: string, password: string): Promise<any> {
+    const user = await this.usersService.findByEmailOrUsername(login);
     if (!user) throw new NotFoundException('User Not found');
     const compare = comparePasswords(password, user!.password);
     if (user && compare) {

@@ -8,13 +8,14 @@ generator client {
 }
 
 model User {
-  id        String @id @default(cuid())
-  username  String @unique
-  name      String
-  email     String @unique
-  password  String
-  objective String
-
+  id          String       @id @default(cuid())
+  username    String?      @unique
+  name        String
+  email       String       @unique
+  password    String
+  language    String
+  phone       String?      @unique
+  objective   String?
   payments    Payment[]
   studyThemes StudyTheme[]
 
