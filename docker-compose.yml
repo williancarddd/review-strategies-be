@@ -16,7 +16,7 @@ services:
   database:
     image: postgres:15-alpine
     # ports:
-    # #  - "${DATABASE_PORT}:${DATABASE_PORT}"
+    #   - "${DATABASE_PORT}:${DATABASE_PORT}"
     # expose:
     #   - "${DATABASE_PORT}"
     environment:
