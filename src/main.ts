@@ -7,14 +7,10 @@ import { PrismaExceptionFilters } from './commons/filters/prisma.exception.filte
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.enableCors();
   app.useGlobalFilters(new ZodFilter());
   app.useGlobalFilters(new PrismaExceptionFilters());
-  app.enableCors({
-    origin: 'https://reviewstrategies.com.br',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
-  });
+  
   
   patchNestJsSwagger();
   const config = new DocumentBuilder()
