@@ -9,7 +9,12 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalFilters(new ZodFilter());
   app.useGlobalFilters(new PrismaExceptionFilters());
-  app.enableCors();
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+  });
   patchNestJsSwagger();
   const config = new DocumentBuilder()
     .setTitle('REVIEW STRATEGIES')
