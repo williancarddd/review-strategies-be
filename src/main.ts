@@ -10,11 +10,12 @@ async function bootstrap() {
   app.useGlobalFilters(new ZodFilter());
   app.useGlobalFilters(new PrismaExceptionFilters());
   app.enableCors({
-    origin: '*',
+    origin: 'https://reviewstrategies.com.br',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     preflightContinue: false,
     optionsSuccessStatus: 204,
   });
+  
   patchNestJsSwagger();
   const config = new DocumentBuilder()
     .setTitle('REVIEW STRATEGIES')
