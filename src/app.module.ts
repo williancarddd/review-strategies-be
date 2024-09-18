@@ -6,8 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
-import { StudyThemesModule } from './study-themes/study-themes.module';
-import { StudyDatesModule } from './study-dates/study-dates.module';
+import { StudyThemesModule } from './study-day/study-day.module';
 import { PaymentsModule } from './payments/payments.module';
 import { VerifyPaymentMiddleware } from './commons/middlewares/check.payment';
 import { JwtService } from '@nestjs/jwt';
@@ -21,7 +20,6 @@ import { TicketsModule } from './tickets/tickets.module';
     UsersModule,
     PrismaModule,
     StudyThemesModule,
-    StudyDatesModule,
     PaymentsModule,
     TicketsModule,
   ],
