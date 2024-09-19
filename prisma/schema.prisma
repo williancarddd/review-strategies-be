@@ -8,32 +8,22 @@ generator client {
 }
 
 model User {
-  id        String    @id @default(cuid())
-  username  String?   @unique
+  id        String  @id @default(cuid())
+  username  String? @unique
   name      String
-  email     String    @unique
+  email     String  @unique
   password  String
   language  String
-  phone     String?   @unique
+  phone     String? @unique
   objective String?
-  payments  Payment[]
+
+  stripeCustomerId         String?
+  stripeSubscriptionId     String?
+  stripeSubscriptionStatus String?
 
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   StudyDay  StudyDay[]
-}
-
-model Payment {
-  id          String      @id @default(cuid())
-  user        User        @relation(fields: [userId], references: [id])
-  userId      String
-  amount      Float
-  paymentType PaymentType // Enum: 'PIX', 'CARD'
-
-  status PaymentStatus // Enum: 'PENDING', 'COMPLETED', 'FAILED'
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 model StudyDay {
@@ -63,13 +53,10 @@ enum StudyStatus {
   SKIPPED
 }
 
-enum PaymentType {
-  PIX
-  CARD
-}
-
-enum PaymentStatus {
-  PENDING
-  COMPLETED
-  FAILED
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+  UNPAID
+  TRIALING
 }

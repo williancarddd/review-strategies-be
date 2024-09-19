@@ -25,18 +25,7 @@ export class VerifyPaymentMiddleware implements NestMiddleware {
       // Obter o ID do usuário (sub) do token
       const userId = payload.sub;
       // Verificar o pagamento mais recente do usuário
-      const recentPayment = await this.prisma.payment.findFirst({
-        where: {
-          userId,
-          status: 'COMPLETED',
-        },
-        orderBy: {
-          createdAt: 'desc',
-        },
-      });
-      if (recentPayment) {
-        return res.status(403).send('Not allowed. Payment required.');
-      }
+     
 
       next();
     } catch (error) {

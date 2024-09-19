@@ -21,6 +21,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@golevelup/nestjs-stripe": "^0.8.2",
     "@nestjs-modules/mailer": "^2.0.2",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.2.3",
@@ -32,6 +33,7 @@
     "@nestjs/swagger": "^7.4.0",
     "@prisma/client": "^5.19.1",
     "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.3",
     "date-fns": "^3.6.0",
     "jsonwebtoken": "^9.0.2",
     "nest-casl": "^1.9.7",

@@ -1,61 +1,238 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+// stripe.service.ts
+import { BadGatewayException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { NotFoundError } from 'rxjs';
 import { PrismaService } from 'src/database/prisma/prisma.service';
 import Stripe from 'stripe';
 
 @Injectable()
-export class PaymentsService {
-  private stripe: Stripe;
+export class StripeService {
+  public stripe: Stripe;
 
-  constructor(private readonly prisma: PrismaService) {
-    this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
+  constructor(private prisma: PrismaService) {
+    this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
       apiVersion: '2024-06-20',
+      httpClient: Stripe.createFetchHttpClient(),
     });
   }
 
-  // Criação de pagamento com Stripe
-  async createPayment(userId: string, amount: number, currency: string) {
-    // Criar uma sessão de pagamento do Stripe
-    const paymentIntent = await this.stripe.paymentIntents.create({
-      amount: amount * 100, // Stripe usa centavos, por isso multiplicamos por 100
-      currency,
-      metadata: { userId },
-    });
 
-    // Salvar o pagamento no banco de dados
-    const payment = await this.prisma.payment.create({
-      data: {
-        userId,
-        amount,
-        paymentType: 'CARD', // Exemplo de tipo de pagamento
-        status: 'PENDING',
-      },
-    });
-
-    return {
-      clientSecret: paymentIntent.client_secret,
-      payment,
-    };
+  async getStripeCustomerByEmail(email: string): Promise<Stripe.Customer> {
+    const customers = await this.stripe.customers.list({ email });
+    return customers.data[0];
   }
 
-  // Verificar status do pagamento
-  async verifyPayment(paymentId: string) {
-    const payment = await this.prisma.payment.findUnique({ where: { id: paymentId } });
-
-    if (!payment) {
-      throw new BadRequestException('Pagamento não encontrado');
+  async createStripeCustomer(email: string, name: string): Promise<Stripe.Customer> {
+    const customer = await this.getStripeCustomerByEmail(email);
+    if (customer) {
+      return customer;
     }
 
-    // Verificar se o pagamento foi confirmado no Stripe
-    const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentId);
+    return await this.stripe.customers.create({
+      email,
+      name,
+    });
+  }
 
-    if (paymentIntent.status === 'succeeded') {
-      await this.prisma.payment.update({
-        where: { id: paymentId },
-        data: { status: 'COMPLETED' },
+  async createCheckoutSession(userEmail: string, userId: string): Promise<{ url: string }> {
+    try {
+      let customer = await this.createStripeCustomer(userEmail, userId);
+      const session = await this.stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        mode: 'subscription',
+        client_reference_id: userId,
+        customer: customer.id,
+        success_url: `https://www.reviewstrategies.com.br/billing/success`,
+        cancel_url: `https://www.reviewstrategies.com.br/billing/cancel`,
+        line_items: [{
+          price: process.env.proPriceId,
+          quantity: 1,
+        }],
       });
-      return 'Pagamento concluído com sucesso';
+      return { url: session.url! };
+    } catch (error) {
+      console.error("createCheckoutSession error", error);
+      throw new BadGatewayException("Error creating checkout session");
+    }
+  }
+
+
+  async handleProcessWebhookCheckout(event: { object: Stripe.Checkout.Session }) {
+    const clientReferenceId = event.object.client_reference_id as string
+    const stripeSubscriptionId = event.object.subscription as string
+    const stripeCustomerId = event.object.customer as string
+    const checkoutStatus = event.object.status
+
+    if (checkoutStatus !== 'complete') return
+
+    if (!clientReferenceId || !stripeSubscriptionId || !stripeCustomerId) {
+      throw new Error('clientReferenceId, stripeSubscriptionId and stripeCustomerId is required')
     }
 
-    return 'Pagamento ainda pendente ou falhou';
+    const userExists = await this.prisma.user.findUnique({
+      where: {
+        id: clientReferenceId
+      },
+      select: {
+        id: true
+      }
+    })
+
+    if (!userExists) {
+      throw new Error('user of clientReferenceId not found')
+    }
+
+    await this.prisma.user.update({
+      where: {
+        id: userExists.id
+      },
+      data: {
+        stripeCustomerId,
+        stripeSubscriptionId
+      }
+    })
+  }
+
+  async handleProcessWebhookUpdatedSubscription(event: { object: Stripe.Subscription }) {
+    const stripeCustomerId = event.object.customer as string
+    const stripeSubscriptionId = event.object.id as string
+    const stripeSubscriptionStatus = event.object.status
+
+    const userExists = await this.prisma.user.findFirst({
+      where: {
+        OR: [
+          {
+            stripeSubscriptionId,
+          },
+          {
+            stripeCustomerId
+          }
+        ]
+      },
+      select: {
+        id: true
+      }
+    })
+
+    if (!userExists) {
+      throw new Error('user of stripeCustomerId not found')
+    }
+
+    await this.prisma.user.update({
+      where: {
+        id: userExists.id
+      },
+      data: {
+        stripeCustomerId,
+        stripeSubscriptionId,
+        stripeSubscriptionStatus,
+      }
+    })
+  }
+
+  async handleProcessWebhookDeletedSubscription(event: { object: Stripe.Subscription }) {
+    const stripeSubscriptionId = event.object.id as string
+
+    const userExists = await this.prisma.user.findFirst({
+      where: {
+        stripeSubscriptionId
+      },
+      select: {
+        id: true
+      }
+    })
+
+    if (!userExists) {
+      throw new Error('user of stripeSubscriptionId not found')
+    }
+
+    await this.prisma.user.update({
+      where: {
+        id: userExists.id
+      },
+      data: {
+        stripeSubscriptionId: null,
+        stripeSubscriptionStatus: null
+      }
+    })
+  }
+
+  async checkIfUserHasActiveSubscription(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: userId
+      },
+      select: {
+        stripeSubscriptionId: true,
+        stripeSubscriptionStatus: true
+      }
+    })
+
+    if (!user) {
+      throw new  NotFoundException('User not found')
+    }
+    
+    if (!user.stripeSubscriptionId) {
+      return {
+        hasActiveSubscription: false
+      }
+    }
+    const stripeStatus = await this.stripe.subscriptions.retrieve(user.stripeSubscriptionId)
+    return {
+      hasActiveSubscription: stripeStatus.status === 'active' || stripeStatus.status === 'trialing'
+    }
+  }
+
+  async billingInformationForUser(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: userId
+      },
+      select: {
+        stripeCustomerId: true,
+        stripeSubscriptionId: true,
+        stripeSubscriptionStatus: true
+      }
+    })
+
+    if (!user) {
+      throw new  NotFoundException('User not found')
+    }
+
+    const stripeCustomer = await this.stripe.customers.retrieve(user.stripeCustomerId!)
+    const stripeSubscription = await this.stripe.subscriptions.retrieve(user.stripeSubscriptionId!)
+    const stripePaymentMethods = await this.stripe.paymentMethods.list({
+      customer: user.stripeCustomerId!,
+    })
+    const invoices = await this.stripe.invoices.list({
+      customer: user.stripeCustomerId!,
+      limit: 10
+    })
+    return {
+      stripeCustomer,
+      stripeSubscription,
+      stripePaymentMethods,
+      invoices
+    }
+  }
+
+  async cancelSubscription(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: userId
+      },
+      select: {
+        stripeSubscriptionId: true
+      }
+    })
+
+    if (!user) {
+      throw new  NotFoundException('User not found')
+    }
+
+    await this.stripe.subscriptions.cancel(user.stripeSubscriptionId!)
+    return {
+      message: 'Subscription canceled'
+    }
   }
 }
