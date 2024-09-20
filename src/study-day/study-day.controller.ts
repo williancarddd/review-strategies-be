@@ -37,6 +37,7 @@ export class StudyDaysController {
     @Query('date') date: Date,
     @Query('userId') userId: string,
   ) {
+    if (!userId) throw new NotFoundException('User ID is required');
     return this.studyDayService.findAllByMonth(date, userId);
   }
 
@@ -49,6 +50,7 @@ export class StudyDaysController {
     @Query('date') date: Date,
     @Query('userId') userId: string,
   ) {
+    if (!userId) throw new NotFoundException('User ID is required');
     return this.studyDayService.findAllByDay(date, userId);
   }
 
