@@ -27,6 +27,8 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4
+    expose:
+      - "${PGADMIN_PORT}"
     ports:
       - "${PGADMIN_PORT}:${PGADMIN_PORT}"
     environment:
