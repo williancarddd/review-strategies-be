@@ -25,6 +25,17 @@ services:
     volumes:
       - review-strategies-db:/var/lib/postgresql/data
 
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - "${PGADMIN_PORT}:${PGADMIN_PORT}"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "${PGADMIN_DEFAULT_EMAIL}"
+      PGADMIN_DEFAULT_PASSWORD: "${PGADMIN_DEFAULT_PASSWORD}"
+    depends_on:
+      - database
+    links:
+      - "database:${HOST}"
 
 volumes:
   review-strategies-db:

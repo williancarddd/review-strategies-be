@@ -199,6 +199,15 @@ export class StripeService {
       throw new  NotFoundException('User not found')
     }
 
+    if (!user.stripeCustomerId || !user.stripeSubscriptionId) {
+      return {
+        stripeCustomer: null,
+        stripeSubscription: null,
+        stripePaymentMethods: null,
+        invoices: null
+      }
+    }
+
     const stripeCustomer = await this.stripe.customers.retrieve(user.stripeCustomerId!)
     const stripeSubscription = await this.stripe.subscriptions.retrieve(user.stripeSubscriptionId!)
     const stripePaymentMethods = await this.stripe.paymentMethods.list({
