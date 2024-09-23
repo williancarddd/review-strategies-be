@@ -7,6 +7,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { UsersModule } from 'src/users/users.module';
 import { UsersService } from 'src/users/users.service';
+import { StripeService } from 'src/payments/payments.service';
 
 
 @Module({
@@ -19,7 +20,7 @@ import { UsersService } from 'src/users/users.service';
     }),
     UsersModule,
   ],
-  providers: [AuthService, LocalStrategy, JwtStrategy, JwtModule, UsersService],
+  providers: [AuthService, LocalStrategy, JwtStrategy, JwtModule, UsersService, StripeService],
   controllers: [AuthController ],
   exports: []
 })

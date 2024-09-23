@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { AuthResponseSchema } from './dto/auth-dto';
 import { comparePasswords } from 'src/utils/crypto';
 import { UsersService } from 'src/users/users.service';
+import { StripeService } from 'src/payments/payments.service';
 
 /*
   The AuthService class is a service that provides methods to validate a user and login.
@@ -18,6 +19,7 @@ export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
+    private readonly stripeService: StripeService
   ) { }
 
   async validateUser(login: string, password: string): Promise<any> {
@@ -32,7 +34,8 @@ export class AuthService {
   }
 
   async login(user) {
-    const payload = { email: user.email, sub: user.id, role: user.role };
+    const subscription = await this.stripeService.checkIfUserHasActiveSubscription(user.id);
+    const payload = { email: user.email, sub: user.id, role: user.role , subscription };
     const response = {
       access_token: this.jwtService.sign(payload),
       ...payload
