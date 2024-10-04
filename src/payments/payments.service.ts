@@ -172,6 +172,13 @@ export class StripeService {
     if (!user) {
       throw new  NotFoundException('User not found')
     }
+
+    if (!user.stripeSubscriptionId || !user.stripeCustomerId) {
+      return {
+        hasActiveSubscription: false
+      }
+    }
+
     const stripeStatus = (await this.stripe.subscriptions.retrieve(user.stripeSubscriptionId!))
     console.log(stripeStatus)
     return {
