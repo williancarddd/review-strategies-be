@@ -63,6 +63,7 @@ export class StripeService {
     const stripeCustomerId = event.object.customer as string
     const checkoutStatus = event.object.status
 
+    console.log(JSON.stringify(event))
     if (checkoutStatus !== 'complete') return
 
     if (!clientReferenceId || !stripeSubscriptionId || !stripeCustomerId) {
