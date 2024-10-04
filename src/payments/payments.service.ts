@@ -164,20 +164,15 @@ export class StripeService {
       },
       select: {
         stripeSubscriptionId: true,
-        stripeSubscriptionStatus: true
+        stripeCustomerId: true
       }
     })
 
     if (!user) {
       throw new  NotFoundException('User not found')
     }
-    
-    if (!user.stripeSubscriptionId) {
-      return {
-        hasActiveSubscription: false
-      }
-    }
-    const stripeStatus = await this.stripe.subscriptions.retrieve(user.stripeSubscriptionId)
+    const stripeStatus = (await this.stripe.subscriptions.retrieve(user.stripeSubscriptionId!))
+    console.log(stripeStatus)
     return {
       hasActiveSubscription: stripeStatus.status === 'active' || stripeStatus.status === 'trialing'
     }
