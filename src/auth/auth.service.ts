@@ -35,7 +35,7 @@ export class AuthService {
 
   async login(user) {
     const subscription = await this.stripeService.checkIfUserHasActiveSubscription(user.id);
-    const payload = { email: user.email, sub: user.id, role: user.role ,hasActiveSubscription: subscription.hasActiveSubscription };
+    const payload = { email: user.email, sub: user.id, role: user.role,hasActiveSubscription: subscription.hasActiveSubscription };
     const response = {
       access_token: this.jwtService.sign(payload),
       ...payload
