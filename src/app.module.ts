@@ -11,6 +11,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { VerifyPaymentMiddleware } from './commons/middlewares/check.payment';
 import { JwtService } from '@nestjs/jwt';
 import { TicketsModule } from './tickets/tickets.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { TicketsModule } from './tickets/tickets.module';
     StudyThemesModule,
     PaymentsModule,
     TicketsModule,
+    NotificationsModule,
   ],
   providers: [
     {

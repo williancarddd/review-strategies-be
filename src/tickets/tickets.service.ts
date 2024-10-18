@@ -1,12 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTicketDto } from './dto/create-ticket.dto';
-import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { CreateTicketSchema } from './entities/ticket.entity';
+import { MailService } from 'src/notifications/mail.service';
 
 @Injectable()
 export class TicketsService {
-  create(createTicketDto: CreateTicketDto) {
+  constructor(
+    private readonly notificationService: MailService,
+  ) { }
+
+  create(
+    createTicketDto: CreateTicketDto,
+
+  ) {
     const parseTicket = CreateTicketSchema.parse(createTicketDto);
-    console.log(parseTicket);
+    this.notificationService.newTicket(parseTicket);
   }
 }
