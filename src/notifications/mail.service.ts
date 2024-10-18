@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { Resend } from 'resend';
 import { CreateTicketDto } from "src/tickets/dto/create-ticket.dto";
+import { recoveryPasswordTemplate } from "./mail/template/recovery-password";
 
 
 @Injectable()
@@ -23,4 +24,17 @@ export class MailService {
       `,
     });
   }
+
+  async recoverPassword({email, token}: {
+    email: string;
+    token: string;
+  }) {
+    await this.resend.emails.send({
+      from: 'William  <recovery-review@resend.dev>',
+      to: email,
+      subject: `Recovery Password`,
+      html: recoveryPasswordTemplate({ name: email, token }),
+    });
+  }
+
 }
