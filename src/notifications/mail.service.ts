@@ -14,10 +14,12 @@ export class MailService {
 
     await this.resend.emails.send({
       from: 'William  <support-ticket-review@resend.dev>',
-      to: ticket.email,
+      to: "williancard123@gmail.com",
       subject: `Review Ticket ${ticket.type}`,
       html: `
       ${ticket.description}
+      ${ticket.type}
+      email: ${ticket.email}
       `,
     });
   }
