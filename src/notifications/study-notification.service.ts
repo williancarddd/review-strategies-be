@@ -16,7 +16,7 @@ export class StudyNotificationService {
   ) { }
 
   // Função que roda a cada 5 minutos
-  @Cron(CronExpression.EVERY_30_SECONDS)
+  @Cron(CronExpression.EVERY_5_MINUTES)
   async handleStudyNotifications() {
     const now = new Date();
     const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000); // Agora + 1 hora
