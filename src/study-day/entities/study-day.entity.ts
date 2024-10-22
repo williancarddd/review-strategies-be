@@ -10,5 +10,6 @@ export const StudyDay = z.object({
   color: z.string().optional(),
   studyStart: z.date(),
   studyEnd: z.date(),
+  lastNotified: z.date().optional(),
   status: z.enum(["PENDING", "COMPLETED", "SKIPPED"]).optional(),
 });

@@ -8,14 +8,15 @@ generator client {
 }
 
 model User {
-  id        String  @id @default(cuid())
-  username  String? @unique
-  name      String
-  email     String  @unique
-  password  String
-  language  String
-  phone     String? @unique
-  objective String?
+  id           String  @id @default(cuid())
+  username     String? @unique
+  name         String
+  email        String  @unique
+  password     String
+  language     String
+  phone        String? @unique
+  objective    String?
+  notification Boolean @default(true)
 
   stripeCustomerId         String?
   stripeSubscriptionId     String?
@@ -24,22 +25,24 @@ model User {
   recoveryPasswordCode  String?
   expiresCodePasswordAt DateTime?
 
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  StudyDay  StudyDay[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  StudyDay     StudyDay[]
+  Notification Notification[]
 }
 
 model StudyDay {
-  id          String      @id @default(cuid())
-  studyStart  DateTime
-  studyEnd    DateTime
-  title       String
-  mode        String
-  color       String?
-  description String?
-  status      StudyStatus
-  user        User        @relation(fields: [userId], references: [id])
-  userId      String
+  id           String      @id @default(cuid())
+  studyStart   DateTime
+  studyEnd     DateTime
+  title        String
+  mode         String
+  color        String?
+  description  String?
+  status       StudyStatus
+  user         User        @relation(fields: [userId], references: [id])
+  userId       String
+  lastNotified DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -47,7 +50,27 @@ model StudyDay {
   firstStudyDay   StudyDay? @relation("FirstStudyDay", fields: [firstStudyDayId], references: [id])
   firstStudyDayId String?
 
-  followingDays StudyDay[] @relation("FirstStudyDay")
+  followingDays StudyDay[]     @relation("FirstStudyDay")
+  Notification  Notification[]
+}
+
+model Notification {
+  id         String           @id @default(cuid())
+  user       User             @relation(fields: [userId], references: [id])
+  userId     String
+  studyDay   StudyDay         @relation(fields: [studyDayId], references: [id])
+  studyDayId String
+  type       NotificationType
+  message    String
+  sentAt     DateTime         @default(now())
+  createdAt  DateTime         @default(now())
+}
+
+enum NotificationType {
+  PUSH
+  EMAIL
+  WHATSAPP
+  DISCORD
 }
 
 enum StudyStatus {

@@ -21,6 +21,7 @@ export const UserSchema = z.object({
   email: z.string({
     required_error: 'Email is required',
   }).email().describe('The email of the user'),
+  notification: z.boolean().describe('The notification of the user'),
   createdAt: z.date().describe('The date when the user was created'),
   updatedAt: z.date().describe('The date when the user was updated'),
 });
