@@ -41,18 +41,6 @@ export class StudyDaysController {
     return this.studyDayService.findAllByMonth(date, userId);
   }
 
-  @ApiOperation({ summary: 'Get all StudyDays by user for a given day' })
-  @ApiQuery({ name: 'date', required: true, type: String, description: 'Date in the format YYYY-MM-DD' })
-  @ApiQuery({ name: 'userId', required: true, type: String })
-  @ApiResponse({ status: 200, description: 'StudyDays for the specified day' })
-  @Get('day')
-  async findAllByDay(
-    @Query('date') date: Date,
-    @Query('userId') userId: string,
-  ) {
-    if (!userId) throw new NotFoundException('User ID is required');
-    return this.studyDayService.findAllByDay(date, userId);
-  }
 
   @ApiOperation({ summary: 'Get a StudyDay by ID' })
   @ApiResponse({ status: 200, description: 'StudyDay found' })
